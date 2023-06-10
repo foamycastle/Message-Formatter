@@ -127,7 +127,7 @@ class MessageFormatter
         foreach ($this->symbolTable as $symbol=>$symbolData) {
 
             //if the symbolTable contains a callable reference, try to resolve it to scalar data
-            if(is_callable($symbolData,true,$methodToCall)){
+            if(is_callable($symbolData,false,$methodToCall)){
 
                 //set up a resolutions counter. if we can't resolve after so many tries, give up
                 $callableCounter=0;
@@ -137,13 +137,13 @@ class MessageFormatter
                     $symbolData=$methodToCall();
                     $callableCounter++;
                 }while(
-                    !is_callable($symbolData,true,$methodToCall) ||
+                    !is_callable($symbolData,false,$methodToCall) ||
                     $callableCounter < self::CALLABLE_COUNTER_MAX
                 );
 
                 //if the $symbolData is still a callable reference after n tries, remove this symbol from the symbolTable
                 //and move on to resolving the rest of the list.
-                if(is_callable($symbolData,true)){
+                if(is_callable($symbolData,false)){
                     unset($symbolData);
                     continue;
                 }
