@@ -199,6 +199,7 @@ class MessageFormatter
         if(is_bool($object)){
             $object=$object?"true":"false";
         }
+        if(null===$object) $object="";
         return $object;
     }
 }
