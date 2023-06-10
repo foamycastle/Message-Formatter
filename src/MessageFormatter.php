@@ -179,7 +179,7 @@ class MessageFormatter
     private function printArrayRecursive(array $input):string{
         $outputString="";
         do{
-            $thisInput=array_shift($input);
+            $thisInput=current($input);
             $thisKey=key($thisInput);
             $thisValue=$thisInput[$thisKey];
             if(is_array($thisValue)){
@@ -188,7 +188,7 @@ class MessageFormatter
                 $outputString .= "[$thisKey => $thisValue]";
             }
             $outputString.=(count($input)>0 ? ", ":"");
-        }while(count($input)>0);
+        }while(next($input));
         return $outputString;
     }
     private function getSymbols():array{
