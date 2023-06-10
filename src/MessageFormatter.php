@@ -135,11 +135,10 @@ class MessageFormatter
         return in_array(\Stringable::class,$implement)||$hasStringMethod;
     }
     private function printArrayRecursive(array $input):string{
-        $outputString="";
+        $outputString="[";
         while(current($input)!==false){
             $thisKey=key($input);
             $thisValue=current($input);
-            $outputString .= "[";
             if(!is_numeric($thisKey)){
                 $outputString .= $this->resolveObjectToString($thisKey) . " => ";
             }
