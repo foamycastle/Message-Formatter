@@ -82,35 +82,67 @@ class MessageFormatter
         unset($this->symbolTemplates[$isPresent]);
         return $this;
     }
+
+    /**
+     * Add a symbol to the symbol table
+     * @param array|string $symbol plain-text symbol identifier. Do not include any curly braces or other bounding characters
+     * @param array|string|object|int|float|bool|\Closure $value the object that will replace the symbol
+     * @return $this
+     */
     public function addSymbol(array|string $symbol, $value=null):self{
         if(is_array($symbol)){
             reset($symbol);
+            //$symbol = ['symbol', 'value']
             if(is_string($symbol[0])) {
                 $this->symbolTable[$symbol[0]] = $symbol[1];
             }
+            //$symbol = ['symbol'=>'value']
             if(is_string(key($symbol))){
                 $key=key($symbol);
                 $this->symbolTable[$key]=$symbol[$key];
             }
+            //$symbol = 'symbol' $value='value'
         }elseif(is_string($symbol)&&null!==$value) {
             $this->symbolTable[$symbol] = $value;
         }
         return $this;
     }
+
+    /**
+     * Remove a symbol from the symbol table
+     * @param string $symbol the plain-text symbol identifier
+     * @return $this
+     */
     public function removeSymbol(string $symbol):self{
         if(isset($this->symbolTable[$symbol])){
             unset($this->symbolTable[$symbol]);
         }
         return $this;
     }
+
+    /**
+     * Output the fully formatted and replaced message
+     * @return string
+     */
     public function getMessage():string{
         return $this->performReplacement();
     }
+
+    /**
+     * Set a string containing symbols to be replaced with values
+     * @param string $message
+     * @return $this
+     */
     public function setMessage(string $message):self{
         $this->rawMessage=$message;
         return $this;
     }
 
+    /**
+     * Returns an array of possible templates that a symbol could be found in
+     * @param string $symbol plain-text symbol
+     * @return array
+     */
     private function getPossibleSymbols(string $symbol):array{
 
         $templates= $this->symbolTemplates;
@@ -121,6 +153,10 @@ class MessageFormatter
         return $outputArray;
     }
 
+    /**
+     * Iterate through the symbol table and resolve each value that will replace each symbol
+     * @return array<string,mixed> the array of ['symbol'=>'value']
+     */
     private function resolveSymbols():array
     {
         $outputArray=[];
@@ -129,11 +165,23 @@ class MessageFormatter
         }
         return $outputArray;
     }
+
+    /**
+     * Determine if an object can be cast to a string
+     * @param object $data
+     * @return bool TRUE if object can be cast to a string
+     */
     private function objectIsStringable(object $data):bool{
         $implement=class_implements($data,false);
         $hasStringMethod=method_exists($data,'__toString');
         return in_array(\Stringable::class,$implement)||$hasStringMethod;
     }
+
+    /**
+     * Similar to print_r($array,true). The difference with this function is cleaner output formatting
+     * @param array $input The array to recurse through
+     * @return string The array printed to a (cleaner) formatted string
+     */
     private function printArrayRecursive(array $input):string{
         $outputString="[";
         while(current($input)!==false){
@@ -152,9 +200,19 @@ class MessageFormatter
         }
         return $outputString;
     }
+
+    /**
+     * Return an array of only the plain-text symbol identifiers
+     * @return array list of symbol identifiers
+     */
     private function getSymbols():array{
         return array_keys($this->symbolTable);
     }
+
+    /**
+     * Iterate through the symbol table and perform a find-and-replace on the rawMessage property
+     * @return string a fully-processed string, symbols having been replaced with resolved values
+     */
     private function performReplacement():string{
         $outputMessage=$this->rawMessage;
         $resolvedSymbols=$this->resolveSymbols();
@@ -165,6 +223,11 @@ class MessageFormatter
         return $outputMessage;
     }
 
+    /**
+     * Resolve each value to a string form
+     * @param mixed $object the value to resolve to string form
+     * @return string
+     */
     private function resolveObjectToString($object):string
     {
         //if the symbolTable contains a callable reference, try to resolve it to scalar data
