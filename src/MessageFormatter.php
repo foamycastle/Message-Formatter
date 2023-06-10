@@ -139,12 +139,16 @@ class MessageFormatter
         while(current($input)!==false){
             $thisKey=key($input);
             $thisValue=current($input);
+            $outputString .= "[";
             if(is_array($thisValue)){
-                $outputString.= "[$thisKey => ".$this->printArrayRecursive($thisValue)."]";
-            }else {
-                $outputString .= "[$thisKey => ".$this->resolveObjectToString($thisValue)."]";
+                $outputString.= $thisKey." => ".$this->printArrayRecursive($thisValue);
+            }elseif(is_string($thisValue)){
+                $outputString .= $thisKey." => ".$this->resolveObjectToString($thisValue);
+            }elseif (is_numeric($thisValue)){
+                $outputString .= $thisValue;
             }
-            $outputString.=(next($input)!==false ? ", ":"");
+
+            $outputString.=(next($input)!==false ? ", ":"]");
         }
         return $outputString;
     }
