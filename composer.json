@@ -13,9 +13,17 @@
   "require": {
     "php": ">=8.0"
   },
+  "require-dev": {
+    "phpunit/phpunit": "10.2.1"
+  },
   "autoload": {
     "psr-4": {
       "FoamyCastle\\Utils\\MessageFormatter\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "FoamyCastle\\Utils\\Test\\": "tests/"
     }
   }
 }
