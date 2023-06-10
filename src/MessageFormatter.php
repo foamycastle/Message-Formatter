@@ -175,6 +175,9 @@ class MessageFormatter
                 if(is_callable($resolved)){
                     $object=$resolved;
                     $callableCounter++;
+                }else{
+                    $object=$resolved;
+                    break;
                 }
             }while($callableCounter < self::CALLABLE_COUNTER_MAX);
 
