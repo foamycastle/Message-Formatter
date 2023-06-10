@@ -121,7 +121,7 @@ class MessageFormatter
         return $outputArray;
     }
 
-    private function resolveSymbols():array
+    public function resolveSymbols():array
     {
         $outputArray=[];
         foreach ($this->symbolTable as $symbol=>$symbolData) {
@@ -134,12 +134,16 @@ class MessageFormatter
 
                 //begin a loop that will continue resolving until the result is not a callable reference.
                 do{
-                    $symbolData=$methodToCall();
-                    $callableCounter++;
-                }while(
-                    !is_callable($symbolData,false,$methodToCall) ||
-                    $callableCounter < self::CALLABLE_COUNTER_MAX
-                );
+                    $resolved=$symbolData();
+                    if(is_callable($resolved)){
+                        $symbolData=$resolved;
+                        $callableCounter++;
+                        continue;
+                    }else{
+                        $symbolData=$resolved;
+                        break;
+                    }
+                }while($callableCounter < self::CALLABLE_COUNTER_MAX);
 
                 //if the $symbolData is still a callable reference after n tries, remove this symbol from the symbolTable
                 //and move on to resolving the rest of the list.
