@@ -23,8 +23,12 @@ class MessageFormatter
     private $symbolTable;
 
     /**
-     * An array that contains symbol templates. The default symbol template is created at instantiation but other
-     * symbol templates can be added after the fact.
+     * An array that contains symbol templates. A symbol template consists of the characters that surround a '%s' identifier. 
+     *
+     * Examples: [%s] {{%s}} %%s% where '%s' will be replaced with the plain-text symbol identifier
+     * 
+     * The default symbol template is created at instantiation but other symbol templates can be added after the fact.
+     * 
      * @var string[]
      * @psalm-var string[]
      */
