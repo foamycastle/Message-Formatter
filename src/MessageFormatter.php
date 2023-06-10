@@ -121,7 +121,7 @@ class MessageFormatter
         return $outputArray;
     }
 
-    public function resolveSymbols():array
+    private function resolveSymbols():array
     {
         $outputArray=[];
         foreach ($this->symbolTable as $symbol=>$symbolData) {
