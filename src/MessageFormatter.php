@@ -124,50 +124,8 @@ class MessageFormatter
     private function resolveSymbols():array
     {
         $outputArray=[];
-        foreach ($this->symbolTable as $symbol=>$symbolData) {
-
-            //if the symbolTable contains a callable reference, try to resolve it to scalar data
-            if(is_callable($symbolData,false,$methodToCall)){
-
-                //set up a resolutions counter. if we can't resolve after so many tries, give up
-                $callableCounter=0;
-
-                //begin a loop that will continue resolving until the result is not a callable reference.
-                do{
-                    $resolved=$symbolData();
-                    if(is_callable($resolved)){
-                        $symbolData=$resolved;
-                        $callableCounter++;
-                        continue;
-                    }else{
-                        $symbolData=$resolved;
-                        break;
-                    }
-                }while($callableCounter < self::CALLABLE_COUNTER_MAX);
-
-                //if the $symbolData is still a callable reference after n tries, remove this symbol from the symbolTable
-                //and move on to resolving the rest of the list.
-                if(is_callable($symbolData,false)){
-                    unset($symbolData);
-                    continue;
-                }
-            }
-            if(is_object($symbolData)){
-                $symbolData=
-                    $this->objectIsStringable($symbolData)
-                        ? (string)$symbolData
-                        : "[".$symbolData::class."]";
-            }
-            if(is_array($symbolData)){
-                $outputArray[$symbol]=$this->printArrayRecursive($symbolData);
-                continue;
-            }
-            if(is_bool($symbolData)){
-                $symbolData=$symbolData?"true":"false";
-            }
-
-            $outputArray[$symbol]=(string)$symbolData;
-
+        foreach ($this->symbolTable as $symbol=>$object) {
+            $outputArray[$symbol]=$this->resolveObjectToString($object);
         }
         return $outputArray;
     }
@@ -184,7 +142,7 @@ class MessageFormatter
             if(is_array($thisValue)){
                 $outputString.= "[$thisKey => ".$this->printArrayRecursive($thisValue)."]";
             }else {
-                $outputString .= "[$thisKey => $thisValue]";
+                $outputString .= "[$thisKey => ".$this->resolveObjectToString($thisValue)."]";
             }
             $outputString.=(next($input)!==false ? ", ":"");
         }
@@ -201,5 +159,43 @@ class MessageFormatter
             $outputMessage=str_replace($templates,$resolvedSymbols[$symbol],$outputMessage);
         }
         return $outputMessage;
+    }
+
+    private function resolveObjectToString($object):string
+    {
+        //if the symbolTable contains a callable reference, try to resolve it to scalar data
+        if(is_callable($object,false,$methodToCall)){
+
+            //set up a resolutions counter. if we can't resolve after so many tries, give up
+            $callableCounter=0;
+
+            //begin a loop that will continue resolving until the result is not a callable reference.
+            do{
+                $resolved=$object();
+                if(is_callable($resolved)){
+                    $object=$resolved;
+                    $callableCounter++;
+                }
+            }while($callableCounter < self::CALLABLE_COUNTER_MAX);
+
+            //if the $object is still a callable reference after n tries, remove this symbol from the symbolTable
+            //and move on to resolving the rest of the list.
+            if(is_callable($object,false)){
+                return "";
+            }
+        }
+        if(is_object($object)){
+            $object=
+                $this->objectIsStringable($object)
+                    ? (string)$object
+                    : "[".$object::class."]";
+        }
+        if(is_array($object)){
+            return $this->printArrayRecursive($object);
+        }
+        if(is_bool($object)){
+            $object=$object?"true":"false";
+        }
+        return $object;
     }
 }
