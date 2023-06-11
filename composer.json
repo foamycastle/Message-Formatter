@@ -7,7 +7,6 @@
       "email": "unclepong@gmail.com"
     }
   ],
-  "version": "1.0.7",
   "license": "GPL-3.0-or-later",
   "minimum-stability": "dev",
   "prefer-stable": false,
