@@ -112,6 +112,12 @@ class MessageFormatter
         return $this;
     }
 
+    public function setSymbolTable(array $symbolTable):self{
+        if(empty($symbolTable)) return $this;
+        $this->symbolTable=$symbolTable;
+        return $this;
+    }
+
     /**
      * Remove a symbol from the symbol table
      * @param string $symbol the plain-text symbol identifier
