@@ -124,6 +124,11 @@ class MessageFormatter
         return $this;
     }
 
+    public function clearSymbolTable():self{
+        unset($this->symbolTable);
+        return $this;
+    }
+
     /**
      * Output the fully formatted and replaced message
      * @return string
