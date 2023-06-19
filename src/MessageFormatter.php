@@ -2,6 +2,8 @@
 
 namespace FoamyCastle\Utils\MessageFormatter;
 
+use FoamyCastle\Utils\DataResolver;
+
 class MessageFormatter
 {
     /**
@@ -176,7 +178,7 @@ class MessageFormatter
     {
         $outputArray=[];
         foreach ($this->symbolTable as $symbol=>$object) {
-            $outputArray[$symbol]=$this->resolveObjectToString($object);
+            $outputArray[$symbol]=(string)(new DataResolver($object));
         }
         return $outputArray;
     }
