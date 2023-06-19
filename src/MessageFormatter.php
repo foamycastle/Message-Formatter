@@ -195,30 +195,6 @@ class MessageFormatter
     }
 
     /**
-     * Similar to print_r($array,true). The difference with this function is cleaner output formatting
-     * @param array $input The array to recurse through
-     * @return string The array printed to a (cleaner) formatted string
-     */
-    private function printArrayRecursive(array $input):string{
-        $outputString="[";
-        while(current($input)!==false){
-            $thisKey=key($input);
-            $thisValue=current($input);
-            if(!is_numeric($thisKey)){
-                $outputString .= $this->resolveObjectToString($thisKey) . " => ";
-            }
-            if(is_array($thisValue)){
-                $outputString.= $this->printArrayRecursive($thisValue);
-            }else{
-                $outputString .= $this->resolveObjectToString($thisValue);
-            }
-
-            $outputString.=(next($input)!==false ? ", ":"]");
-        }
-        return $outputString;
-    }
-
-    /**
      * Return an array of only the plain-text symbol identifiers
      * @return array list of symbol identifiers
      */
@@ -240,50 +216,5 @@ class MessageFormatter
         return $outputMessage;
     }
 
-    /**
-     * Resolve each value to a string form
-     * @param mixed $object the value to resolve to string form
-     * @return string
-     */
-    private function resolveObjectToString($object):string
-    {
-        //if the symbolTable contains a callable reference, try to resolve it to scalar data
-        if(is_callable($object,false,$methodToCall)){
 
-            //set up a resolutions counter. if we can't resolve after so many tries, give up
-            $callableCounter=0;
-
-            //begin a loop that will continue resolving until the result is not a callable reference.
-            do{
-                $resolved=$object();
-                if(is_callable($resolved)){
-                    $object=$resolved;
-                    $callableCounter++;
-                }else{
-                    $object=$resolved;
-                    break;
-                }
-            }while($callableCounter < self::CALLABLE_COUNTER_MAX);
-
-            //if the $object is still a callable reference after n tries, remove this symbol from the symbolTable
-            //and move on to resolving the rest of the list.
-            if(is_callable($object,false)){
-                return "";
-            }
-        }
-        if(is_object($object)){
-            $object=
-                $this->objectIsStringable($object)
-                    ? (string)$object
-                    : "[".$object::class."]";
-        }
-        if(is_array($object)){
-            return $this->printArrayRecursive($object);
-        }
-        if(is_bool($object)){
-            $object=$object?"true":"false";
-        }
-        if(null===$object) $object="";
-        return $object;
-    }
 }
