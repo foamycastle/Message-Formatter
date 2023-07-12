@@ -142,12 +142,45 @@ class MessageFormatter
     private function performReplacement():string{
         $outputMessage=$this->rawMessage;
         $resolvedSymbols=$this->resolveSymbols();
-        foreach ($this->getSymbols() as $symbol) {
-
-            $outputMessage=str_replace($templates,$resolvedSymbols[$symbol],$outputMessage);
+        $optionals=$this->findOptionals();
+        if(false!==$optionals){
+            foreach ($optionals as $optional) {
+                $findSymbols=$this->findSymbols($optional);
+                $replace=false;
+                $replacedString=$optional;
+                foreach ($findSymbols as $symbol) {
+                    if(!empty($resolvedSymbols[$symbol])){
+                        $replace=true;
+                        $replacedString=str_replace("{".$symbol."}",$resolvedSymbols[$symbol],$replacedString);
+                    }else{
+                        $replacedString=str_replace("{".$symbol."}","",$replacedString);
+                    }
+                }
+                if(!$replace){
+                    $outputMessage=str_replace($optional,"",$outputMessage);
+                }else{
+                    $outputMessage=str_replace($optional,trim($replacedString,"[]"),$outputMessage);
+                }
+            }
+        }else{
+            $findSymbols=$this->findSymbols($outputMessage);
+            foreach ($findSymbols as $symbol) {
+                $outputMessage=str_replace("{".$symbol."}",$resolvedSymbols[$symbol],$outputMessage);
+            }
         }
         return $outputMessage;
     }
-
+    private function findOptionals():array|false
+    {
+        return preg_match_all(self::REGEX_FIND_OPTIONALS,$this->rawMessage,$optionals)>0
+            ? $optionals['optional']
+            : false;
+    }
+    private function findSymbols(string $optional):array|false
+    {
+        return preg_match_all(self::REGEX_FIND_SYMBOL,$optional,$foundSymbols)>0
+            ? $foundSymbols['symbol']
+            : false;
+    }
 
 }
