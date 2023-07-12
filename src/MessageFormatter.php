@@ -25,18 +25,6 @@ class MessageFormatter
     private $symbolTable;
 
     /**
-     * An array that contains symbol templates. A symbol template consists of the characters that surround a '%s' identifier. 
-     *
-     * Examples: [%s] {{%s}} %%s% where '%s' will be replaced with the plain-text symbol identifier
-     * 
-     * The default symbol template is created at instantiation but other symbol templates can be added after the fact.
-     * 
-     * @var string[]
-     * @psalm-var string[]
-     */
-    private $symbolTemplates=[];
-
-    /**
      * The default symbol template is '{%s}' where '%s' is the alphanumeric symbol name. The symbol template can be changed
      * and other symbol templates can be added
      * @param string $rawMessage
@@ -47,7 +35,6 @@ class MessageFormatter
     {
         $this->rawMessage=$rawMessage;
         $this->symbolTable=$symbolTable;
-        $this->symbolTemplates[]='{%s}';
     }
     public function __invoke(string $message="",$symbolTable=[]):self
     {
@@ -57,36 +44,6 @@ class MessageFormatter
     }
     public function __toString():string{
         return $this->getMessage();
-    }
-    /**
-     * Add a symbol template to the search and replace algorithm
-     * @param string $symbolBegin
-     * @param string $symbolEnd
-     * @return $this
-     */
-    public function addTemplate(string $symbolBegin,string $symbolEnd):self{
-        if($symbolBegin==""||$symbolEnd=="") return $this;
-        $this->symbolTemplates[]="$symbolBegin%s$symbolEnd";
-        return $this;
-    }
-
-    /**
-     * Remove a symbol template from the search and replace algorithm
-     * @param string $symbolBegin
-     * @param string $symbolEnd
-     * @return $this
-     */
-    public function removeTemplate(string $symbolBegin, string $symbolEnd):self{
-        if($symbolBegin==""||$symbolEnd=="") return $this;
-        $searchFor="$symbolBegin%s$symbolEnd";
-        $isPresent=array_search($searchFor,$this->symbolTemplates);
-        if(false===$isPresent){
-            //symbol template was not found
-            return $this;
-        }
-        //symbol template was found, unset it
-        unset($this->symbolTemplates[$isPresent]);
-        return $this;
     }
 
     /**
@@ -156,21 +113,6 @@ class MessageFormatter
     }
 
     /**
-     * Returns an array of possible templates that a symbol could be found in
-     * @param string $symbol plain-text symbol
-     * @return array
-     */
-    private function getPossibleSymbols(string $symbol):array{
-
-        $templates= $this->symbolTemplates;
-        $outputArray=[];
-        foreach ($templates as $template) {
-            $outputArray[]=str_replace('%s',$symbol,$template);
-        }
-        return $outputArray;
-    }
-
-    /**
      * Iterate through the symbol table and resolve each value that will replace each symbol
      * @return array<string,mixed> the array of ['symbol'=>'value']
      */
@@ -210,7 +152,7 @@ class MessageFormatter
         $outputMessage=$this->rawMessage;
         $resolvedSymbols=$this->resolveSymbols();
         foreach ($this->getSymbols() as $symbol) {
-            $templates=$this->getPossibleSymbols($symbol);
+
             $outputMessage=str_replace($templates,$resolvedSymbols[$symbol],$outputMessage);
         }
         return $outputMessage;
