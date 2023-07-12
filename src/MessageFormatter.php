@@ -128,17 +128,6 @@ class MessageFormatter
     }
 
     /**
-     * Determine if an object can be cast to a string
-     * @param object $data
-     * @return bool TRUE if object can be cast to a string
-     */
-    private function objectIsStringable(object $data):bool{
-        $implement=class_implements($data,false);
-        $hasStringMethod=method_exists($data,'__toString');
-        return in_array(\Stringable::class,$implement)||$hasStringMethod;
-    }
-
-    /**
      * Return an array of only the plain-text symbol identifiers
      * @return array list of symbol identifiers
      */
