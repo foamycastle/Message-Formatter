@@ -6,6 +6,8 @@ use FoamyCastle\Utils\DataResolver;
 
 class MessageFormatter
 {
+    private const REGEX_FIND_OPTIONALS="/(?:(?<optional>(?:\[)(?<optional_text>[^\]\[]*)(?:\])))/";
+    private const REGEX_FIND_SYMBOL="/(?:{(?<symbol>[^\r\n}]+)})/";
     /**
      * when resolving symbols, callables may be used. when called, a callable may resolve to
      * another callable reference. this loop could theoretically continue indefinitely. this const
