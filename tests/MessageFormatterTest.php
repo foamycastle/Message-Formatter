@@ -59,21 +59,51 @@ class MessageFormatterTest extends TestCase
         self::assertGreaterThan(0,stripos($formatter,'dildo'));
         self::assertFalse(stripos($formatter,'buttfucked'));
     }
-    public function testAddTemplate()
+    public function testBlankSymbolsInOptionals()
     {
-        $message='this is a {symbol1} message. this is a [dope:,this is a [cheese:';
+        $message = "This is a [message with {optional} {parts}] blank message.";
         $symbols=[
-            'symbol1'=>function(){
-                return 'buttfucked';
-            }
+            'optional'=>'',
+            'parts'=>''
         ];
         $formatter=new MessageFormatter($message,$symbols);
-        $formatter
-            ->addTemplate("[",":")
-            ->addSymbol('dope','fucking cool')
-            ->addSymbol('cheese','corn');
-        self::assertGreaterThan(0,stripos($formatter,'fucking cool'));
-        self::assertGreaterThan(0,stripos($formatter,'corn'));
-        self::assertGreaterThan(0,stripos($formatter,'buttfucked'));
+        self::assertEquals("This is a  blank message.",(string)$formatter);
+
     }
+    public function testSymbolsInOptionals()
+    {
+        $message = "This is a [message with {optional} {parts}].";
+        $symbols=[
+            'optional'=>'lame',
+            'parts'=>'limbs'
+        ];
+        $formatter=new MessageFormatter($message,$symbols);
+        self::assertEquals("This is a message with lame limbs.",(string)$formatter);
+
+    }
+    public function testManyOptionals()
+    {
+        $message = "This is a [message with {optional} {parts}] [blank {message}].";
+        $symbols=[
+            'optional'=>'that',
+            'parts'=>'stupid',
+            'message'=>'look on your face'
+        ];
+        $formatter=new MessageFormatter($message,$symbols);
+        self::assertEquals("This is a message with that stupid blank look on your face.",(string)$formatter);
+
+    }
+    public function testManyOptionalsSomeFullSomeBlank()
+    {
+        $message = "This is a [message with {optional} {parts}][\][blank {message}.]";
+        $symbols=[
+            'optional'=>'that',
+            'parts'=>'stupid',
+            'message'=>''
+        ];
+        $formatter=new MessageFormatter($message,$symbols);
+        self::assertEquals("This is a message with that stupid",(string)$formatter);
+
+    }
+
 }
