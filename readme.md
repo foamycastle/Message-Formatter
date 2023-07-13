@@ -33,28 +33,7 @@ echo $replace($message,$symbolTable);
 
 //output: I have some light bulbs that I need turned on.
 ```
-#### Symbol Templates
-User has the ability to create different symbol templates. The default symbol template is ```"{symbol}"``` User can add their own template by calling the ```addTemplate``` method.
-```php
-//create new symbol templates by adding the
-//beginning and ending of the symbol
 
-$formatter= new MessageFormatter();
-
-$formatter->addTemplate("[[","]]");
-
-$message="You might catch a [[cold]]";
-$symbolTable=[
-    'cold'=>'football'
-];
-
-echo $formatter($message,$symbolTable);
-//output: You might catch a football
-```
-Remove the template later if necessary:
-```php
-$formatter->removeTemplate("[[","]]");
-```
 #### Add and Remove Symbols
 User can add and remove symbols with ```addSymbol()``` and ```removeSymbol()``` methods.
 ```php
