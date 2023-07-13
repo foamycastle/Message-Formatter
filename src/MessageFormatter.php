@@ -162,12 +162,13 @@ class MessageFormatter
                     $outputMessage=str_replace($optional,trim($replacedString,"[]"),$outputMessage);
                 }
             }
-        }else{
-            $findSymbols=$this->findSymbols($outputMessage);
-            foreach ($findSymbols as $symbol) {
-                $outputMessage=str_replace("{".$symbol."}",$resolvedSymbols[$symbol],$outputMessage);
-            }
         }
+
+        $findSymbols=$this->findSymbols($outputMessage);
+        foreach ($findSymbols as $symbol) {
+            $outputMessage = str_replace("{" . $symbol . "}", $resolvedSymbols[$symbol], $outputMessage);
+        }
+
         return $outputMessage;
     }
     private function findOptionals():array|false
