@@ -6,7 +6,7 @@ use FoamyCastle\Utils\DataResolver;
 
 class MessageFormatter
 {
-    private const REGEX_FIND_OPTIONALS="/(?:(?<optional>(?:\[)(?<optional_text>[^\]\[]*)(?:\])))/";
+    private const REGEX_FIND_OPTIONALS="/(?<optional>\[(?:(?<optional_contents>[^\[\]]+)|(?R))*\])/";
     private const REGEX_FIND_SYMBOL="/(?:{(?<symbol>[^\r\n}]+)})/";
     /**
      * when resolving symbols, callables may be used. when called, a callable may resolve to
@@ -27,11 +27,10 @@ class MessageFormatter
     private $symbolTable;
 
     /**
-     * The default symbol template is '{%s}' where '%s' is the alphanumeric symbol name. The symbol template can be changed
-     * and other symbol templates can be added
-     * @param string $rawMessage
-     * @param array $symbolTable
+     * contains the symbols that have been resolved from the symbol table
+     * @var $resolvedSymbols array<string,string|int|float|bool|object|array|Closure>
      */
+    private $resolvedSymbols;
 
     public function __construct(string $rawMessage="",array $symbolTable=[])
     {
@@ -118,21 +117,20 @@ class MessageFormatter
      * Iterate through the symbol table and resolve each value that will replace each symbol
      * @return array<string,mixed> the array of ['symbol'=>'value']
      */
-    private function resolveSymbols():array
+    private function resolveSymbol(string $symbolName):string
     {
-        $outputArray=[];
-        foreach ($this->symbolTable as $symbol=>$object) {
-            $outputArray[$symbol]=(string)(new DataResolver($object));
+        if(!$this->symbolIsResolved($symbolName)) {
+            $this->resolvedSymbols[$symbolName]=(new DataResolver($this->symbolTable[$symbolName]));
         }
-        return $outputArray;
+        return $this->resolvedSymbols[$symbolName];
     }
 
     /**
-     * Return an array of only the plain-text symbol identifiers
+     * Indicates whether a symbol has been resolved
      * @return array list of symbol identifiers
      */
-    private function getSymbols():array{
-        return array_keys($this->symbolTable);
+    private function symbolIsResolved(string $symbolName):bool{
+        return !empty($this->resolvedSymbols[$symbolName]);
     }
 
     /**
@@ -141,46 +139,60 @@ class MessageFormatter
      */
     private function performReplacement():string{
         $outputMessage=$this->rawMessage;
-        $resolvedSymbols=$this->resolveSymbols();
-        $optionals=$this->findOptionals();
-        if(false!==$optionals){
-            foreach ($optionals as $optional) {
-                $findSymbols=$this->findSymbols($optional);
-                $replace=false;
-                $replacedString=$optional;
-                foreach ($findSymbols as $symbol) {
-                    if(!empty($resolvedSymbols[$symbol])){
-                        $replace=true;
-                        $replacedString=str_replace("{".$symbol."}",$resolvedSymbols[$symbol],$replacedString);
-                    }else{
-                        $replacedString=str_replace("{".$symbol."}","",$replacedString);
-                    }
-                }
-                if(!$replace){
-                    $outputMessage=str_replace($optional,"",$outputMessage);
-                }else{
-                    $outputMessage=str_replace($optional,trim($replacedString,"[]"),$outputMessage);
-                }
-            }
-        }else{
-            $findSymbols=$this->findSymbols($outputMessage);
-            foreach ($findSymbols as $symbol) {
-                $outputMessage=str_replace("{".$symbol."}",$resolvedSymbols[$symbol],$outputMessage);
-            }
-        }
+        $this->replaceOptionals($outputMessage);
+        $this->replaceSymbols($outputMessage);
         return $outputMessage;
     }
-    private function findOptionals():array|false
+    private function findOptionals(string $input):array|false
     {
-        return preg_match_all(self::REGEX_FIND_OPTIONALS,$this->rawMessage,$optionals)>0
+        return preg_match_all(self::REGEX_FIND_OPTIONALS,$input,$optionals)>0
             ? $optionals['optional']
             : false;
+    }
+    private function getOptionalText(string $optional):string
+    {
+        return trim($optional,"[]");
+    }
+    private function getSymbolText(string $symbol):string
+    {
+        return trim($symbol,'{}');
     }
     private function findSymbols(string $optional):array|false
     {
         return preg_match_all(self::REGEX_FIND_SYMBOL,$optional,$foundSymbols)>0
             ? $foundSymbols['symbol']
             : false;
+    }
+    private function replaceOptionals(string &$input):void
+    {
+        $optionals=$this->findOptionals($input);
+        if(false!==$optionals){
+            foreach ($optionals as $matchOptional) {
+                $contents=$this->getOptionalText($matchOptional);
+                $this->replaceOptionals($contents);
+                if($this->replaceSymbols($contents)) {
+                    $input = str_replace($matchOptional, $contents, $input);
+                }else{
+                    $input = str_replace($matchOptional, "", $input);
+                }
+            }
+        }
+    }
+    private function replaceSymbols(string &$input):bool
+    {
+        $performedReplace=false;
+        $symbols=$this->findSymbols($input);
+        if(false!==$symbols){
+            foreach ($symbols as $symbol) {
+                $symbolName=$this->getSymbolText($symbol);
+                $symbolData=$this->resolveSymbol($symbolName);
+                if(!empty($symbolData)){
+                    $input=str_replace("{".$symbol."}",$symbolData,$input);
+                    $performedReplace=true;
+                }
+            }
+        }
+        return $performedReplace;
     }
 
 }
