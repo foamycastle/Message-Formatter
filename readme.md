@@ -1,8 +1,8 @@
 # Message Formatter
-### replace {symbols} in strings with any data type.
+## replace {symbols} in strings with any data type.
 
 
-#### Basic Use:
+### Basic Use:
 ```php
 $message = "I have some {symbols} that I need {replaced}."
 $symbolTable = [
@@ -34,7 +34,7 @@ echo $replace($message,$symbolTable);
 //output: I have some light bulbs that I need turned on.
 ```
 
-#### Add and Remove Symbols
+### Add and Remove Symbols
 User can add and remove symbols with ```addSymbol()``` and ```removeSymbol()``` methods.
 ```php
 $formatter->addSymbol("Cherry Pie",3.14);
@@ -57,3 +57,5 @@ $formatter->removeSymbol("Cherry Pie");
 echo $formatter;
 //output: Why don't you have some {Cherry Pie}
 ```
+### Optionals
+Optional inclusions in the final string can be designated using square brackets

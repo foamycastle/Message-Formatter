@@ -91,19 +91,25 @@ class MessageFormatterTest extends TestCase
         ];
         $formatter=new MessageFormatter($message,$symbols);
         self::assertEquals("This is a message with that stupid blank look on your face.",(string)$formatter);
-
     }
     public function testManyOptionalsSomeFullSomeBlank()
     {
-        $message = "This is a [message with {optional} {parts}][\][blank {message}.]";
+        $message = "[{user}[:{password}]@]";
         $symbols=[
-            'optional'=>'that',
-            'parts'=>'stupid',
-            'message'=>''
+            'user'=>'username',
+            'password'=>'password'
         ];
         $formatter=new MessageFormatter($message,$symbols);
-        self::assertEquals("This is a message with that stupid",(string)$formatter);
+        self::assertEquals("username:password@",(string)$formatter);
 
+    }
+    public function testSquareBrackets()
+    {
+        $message = "this message [should] appear with square brackets [in it]";
+        $symbols = [
+        ];
+        $formatter=new MessageFormatter($message,$symbols);
+        self::assertEquals($message,(string)$formatter);
     }
 
 }

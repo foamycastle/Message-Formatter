@@ -6,6 +6,9 @@ use FoamyCastle\Utils\DataResolver;
 
 class MessageFormatter
 {
+    private const REPLACEMENT_NONE=0;
+    private const REPLACEMENT_YES=1;
+    private const REPLACEMENT_NO_SYMBOLS=2;
     private const REGEX_FIND_OPTIONALS="/(?<optional>\[(?:(?<optional_contents>[^\[\]]+)|(?R))*\])/";
     private const REGEX_FIND_SYMBOL="/(?:{(?<symbol>[^\r\n}]+)})/";
     /**
@@ -170,17 +173,18 @@ class MessageFormatter
             foreach ($optionals as $matchOptional) {
                 $contents=$this->getOptionalText($matchOptional);
                 $this->replaceOptionals($contents);
-                if($this->replaceSymbols($contents)) {
+                $replacementStatus=$this->replaceSymbols($contents);
+                if($replacementStatus==self::REPLACEMENT_YES) {
                     $input = str_replace($matchOptional, $contents, $input);
-                }else{
+                }elseif($replacementStatus==self::REPLACEMENT_NONE){
                     $input = str_replace($matchOptional, "", $input);
                 }
             }
         }
     }
-    private function replaceSymbols(string &$input):bool
+    private function replaceSymbols(string &$input):int
     {
-        $performedReplace=false;
+        $performedReplace=self::REPLACEMENT_NONE;
         $symbols=$this->findSymbols($input);
         if(false!==$symbols){
             foreach ($symbols as $symbol) {
@@ -188,9 +192,11 @@ class MessageFormatter
                 $symbolData=$this->resolveSymbol($symbolName);
                 if(!empty($symbolData)){
                     $input=str_replace("{".$symbol."}",$symbolData,$input);
-                    $performedReplace=true;
+                    $performedReplace=self::REPLACEMENT_YES;
                 }
             }
+        }else{
+            $performedReplace=self::REPLACEMENT_NO_SYMBOLS;
         }
         return $performedReplace;
     }
