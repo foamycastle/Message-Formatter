@@ -58,4 +58,23 @@ echo $formatter;
 //output: Why don't you have some {Cherry Pie}
 ```
 ### Optionals
-Optional inclusions in the final string can be designated using square brackets
+Optional inclusions in the final string can be designated using square brackets. Square brackets containing no symbols will be regarded as plain text. Square brackets containing symbols that have no data or are not specified are removed from the final string.<br><br>
+Optional inclusions can also be nested.
+```php
+$untouched='expect [this] to remain untouched';
+$replaced='expect [this to be {verb}]';
+$deleted='expect this [to be {derped}]summer to be hot.';
+
+$formatted= new MessageFormatter($untouched,
+[
+    'verb'=>'replaced'
+]);
+echo $formatted;
+//expect [this] to remain untouched
+
+echo $formatted($replaced);
+//expect this to be replaced
+
+echo $formatted($deleted);
+//expect this summer to be hot
+```
