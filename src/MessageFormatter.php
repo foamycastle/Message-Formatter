@@ -42,8 +42,8 @@ class MessageFormatter
     }
     public function __invoke(string $message="",$symbolTable=[]):self
     {
-        $this->rawMessage=$message;
-        $this->symbolTable=$symbolTable;
+        $this->setMessage($message);
+        $this->setSymbolTable($symbolTable);
         return $this;
     }
     public function __toString():string{
