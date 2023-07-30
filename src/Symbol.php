@@ -1,7 +1,6 @@
 <?php
 
 namespace FoamyCastle\Utils\MessageFormatter;
-include "/Users/account/Dev/MessageFormatter/vendor/autoload.php";
 use FoamyCastle\Utils\DataResolver;
 use Generator;
 
