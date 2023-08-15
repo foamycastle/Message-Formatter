@@ -1,5 +1,5 @@
 {
-  "name": "foamycastle/messageformatter",
+  "name": "foamycastle/message",
   "description": "A class that replaces symbols in strings with almost any datatype",
   "authors": [
     {
@@ -10,9 +10,6 @@
   "license": "GPL-3.0-or-later",
   "require": {
     "php": ">=8.2",
-    "foamycastle/dataresolver": "1.0",
-    "foamycastle/regexlib": "dev-main",
-    "ext-xdebug": "*",
     "ext-mbstring": "*"
   },
   "require-dev": {
