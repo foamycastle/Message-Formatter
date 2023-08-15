@@ -15,11 +15,7 @@ final class DataClosure extends SymbolData
 
     public function __toString(): string
     {
-        $runThisFunction=\Closure::bind(
-            $this->_data,
-            null,
-            null,
-        );
+        $runThisFunction=$this->_data;
         return SymbolData::New(empty($this->args)?$runThisFunction():$runThisFunction(...$this->args));
     }
 
