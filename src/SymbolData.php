@@ -2,18 +2,27 @@
 
 namespace FoamyCastle\Utils\MessageFormatter;
 
-
 use FoamyCastle\Utils\MessageFormatter\SymbolData\DataArray;
 use FoamyCastle\Utils\MessageFormatter\SymbolData\DataClosure;
 use FoamyCastle\Utils\MessageFormatter\SymbolData\DataObject\ObjectCall;
 use FoamyCastle\Utils\MessageFormatter\SymbolData\DataObject\ObjectGet;
 use FoamyCastle\Utils\MessageFormatter\SymbolData\Scalar;
-use PhpParser\Node\Expr\Closure;
 
+/**
+ * An object that contains the scalar data or object that will render to a string
+ */
 abstract class SymbolData implements \Stringable
 {
+    /**
+     * @var mixed Data object
+     */
     protected $_data;
 
+    /**
+     * SymbolData factory. Determines the appropriate object to return
+     * @param $data
+     * @return SymbolData
+     */
     public static function New($data):SymbolData
     {
         if(is_array($data)) {
