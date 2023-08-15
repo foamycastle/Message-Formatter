@@ -19,6 +19,11 @@ final class SymbolTable
         $this->symbolCount=count($symbolsNames);
     }
 
+    /**
+     * Find and replace all symbols in a string with their rendered data
+     * @param string $message
+     * @return int
+     */
     public function replace(string &$message):int
     {
         $_initiator=preg_quote($this->initiator);
@@ -57,6 +62,12 @@ final class SymbolTable
         $message=preg_replace_callback_array($nameRegexArray,$message);
         return $count;
     }
+
+    /**
+     * Insert Symbols into the Symbol pool
+     * @param array<string,mixed> $symbols
+     * @return void
+     */
     public static function import(array $symbols):void
     {
         foreach ($symbols as $symbol => $value) {
@@ -66,6 +77,11 @@ final class SymbolTable
         }
     }
 
+    /**
+     * Remove symbols from the symbol pool
+     * @param string[] $symbols a list of symbol identifiers to remove
+     * @return void
+     */
     public static function remove(...$symbols):void
     {
         foreach ($symbols as $symbol) {
@@ -74,6 +90,12 @@ final class SymbolTable
             }
         }
     }
+
+    /**
+     * Confirms the existence of an identifier in the symbol pool
+     * @param string $name the symbol id
+     * @return bool TRUE if the id exists and has data attached, FALSE if not
+     */
     public static function hasSymbol(string $name):bool
     {
         return isset(self::$symbols[$name])&&(self::$symbols[$name] instanceof Symbol);
