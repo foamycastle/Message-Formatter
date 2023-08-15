@@ -66,6 +66,14 @@ final class SymbolTable
         }
     }
 
+    public static function remove(...$symbols):void
+    {
+        foreach ($symbols as $symbol) {
+            if(isset(self::$symbols[$symbol])){
+                unset(self::$symbols[$symbol]);
+            }
+        }
+    }
     public static function hasSymbol(string $name):bool
     {
         return isset(self::$symbols[$name])&&(self::$symbols[$name] instanceof Symbol);
