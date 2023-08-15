@@ -10,7 +10,6 @@
   "license": "GPL-3.0-or-later",
   "require": {
     "php": ">=8.2",
-    "ext-xdebug": "*",
     "ext-mbstring": "*"
   },
   "require-dev": {
