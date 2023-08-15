@@ -1,102 +1,42 @@
 <?php
 
 namespace FoamyCastle\Utils\MessageFormatter;
-use FoamyCastle\Utils\DataResolver;
-use Generator;
 
-class Symbol
+final class Symbol
 {
     public const DEFAULT_INITIATOR="{";
     public const DEFAULT_TERMINATOR="}";
-    private static array $symbols;
-    public static string $initiator;
-    public static string $terminator;
-    public static function import(array $symbols):void
-    {
-        do{
-            $key=key($symbols);
-            $value=current($symbols);
-            if(is_int($key)|is_string($key)){
-                self::$symbols[$key]=(string)(new DataResolver($value));
-            }
-        }while(false!==next($symbols));
-    }
+    public readonly string $name;
+    public readonly SymbolData $data;
 
-    public static function set(string $key,$value):void
+    public function __construct($name, $data)
     {
-        self::$symbols[$key]=new DataResolver($value);
+        $this->name = self::validateName($name) ? $name : "";
+        $this->data = SymbolData::New($data);
     }
-
-    public static function remove(string $key):void
+    public static function validateName($name): bool
     {
-        if(isset(self::$symbols[$key])){
-            unset(self::$symbols[$key]);
+        if (!is_string($name)) {
+            return false;
         }
-    }
-    public static function getSymbolData(string $key):?string
-    {
-        if(isset(self::$symbols[$key])){
-            return self::$symbols[$key];
+        if (preg_match('/(?i)^[a-z][a-z0-9_]*$/', trim($name)) == 0) {
+            return false;
         }
-        return null;
+        return true;
     }
-
-    public static function getSymbolList():?array{
-        if(!empty(self::$symbols)){
-            return array_keys(self::$symbols);
-        }
-        return null;
-    }
-
-    public static function Find(string $message, string $initiator=self::DEFAULT_INITIATOR, string $terminator=self::DEFAULT_TERMINATOR):Generator
+    public function __toString(): string
     {
-        $matched=[];
-         $searchForSymbols=self::getSymbolList();
-        $areSymbols=preg_match_all("/".$initiator."(".join("|",$searchForSymbols).")".$terminator."/",$message,$matched);
-        $matched=$matched[1]??[];
-        if($areSymbols>0||$areSymbols!==false){
-            do{
-                if(isset(self::$symbols[current($matched)])) {
-                    yield current($matched);
-                }
-            }while(next($matched));
-        }
+        return (string)$this->data;
     }
+    public static function find(string &$message,string $initiator=self::DEFAULT_INITIATOR,string $terminator=self::DEFAULT_TERMINATOR):SymbolTable|false
+    {
+        $_initiator=preg_quote($initiator);
+        $_terminator=preg_quote($terminator);
+        $regex=sprintf('/(?i)(?:%s(?<symbol>[a-z][a-z0-9_]*)(?:(?:=|::)(?:[a-z][a-z0-9_]*))?)%s/',$_initiator,$_terminator);
+        $foundMatches=preg_match_all($regex,$message,$matches)>0;
 
-    public static function Replace(string &$message, string $initiator=self::DEFAULT_INITIATOR, string $terminator=self::DEFAULT_TERMINATOR):bool
-    {
-        $symbolGenerator=self::Find($message,$initiator,$terminator);
-        $count=$replaceCount=0;$didReplace=false;
-        foreach ($symbolGenerator as $symbol) {
-            $symbolData=(string)Symbol::getSymbolData($symbol);
-            if(null===$symbolData) {
-                $message=str_replace($initiator.$symbol.$terminator,"",$message,$count);
-                continue;
-            }
-            $message=str_replace($initiator.$symbol.$terminator,$symbolData,$message,$count);
-            if($symbolData!=""&&!$didReplace){
-                $didReplace=true;
-            }
-        }
-        return $didReplace;
-    }
+        $symbolNamesArray=$matches['symbol'];
+        return new SymbolTable($symbolNamesArray,$initiator,$terminator);
 
-    public static function setInitiator(string $initiator):void
-    {
-        self::$initiator=$initiator;
     }
-
-    public static function setTerminator(string $terminator):void
-    {
-        self::$terminator=$terminator;
-    }
-    public static function getInitiator():string
-    {
-        return self::$initiator ?? self::DEFAULT_INITIATOR;
-    }
-    public static function getTerminator():string
-    {
-        return self::$terminator ?? self::DEFAULT_TERMINATOR;
-    }
-
 }
