@@ -1,5 +1,5 @@
 {
-  "name": "foamycastle/messageformatter",
+  "name": "foamycastle/message",
   "description": "A class that replaces symbols in strings with almost any datatype",
   "authors": [
     {
