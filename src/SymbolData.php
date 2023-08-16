@@ -38,7 +38,7 @@ abstract class SymbolData implements \Stringable
                     if (empty($args)) {
                         return new ObjectCall($object,$method);
                     }
-                return new ObjectCall($object, $method, ...$args);
+                return new ObjectCall($object, $method, $args);
                 }
             }
             return new DataArray($data);
