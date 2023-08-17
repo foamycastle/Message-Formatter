@@ -26,19 +26,19 @@ abstract class SymbolData implements \Stringable
     public static function New($data):SymbolData
     {
         if(is_array($data)) {
-            if (count($data) == 2) {
+            if (count($data) == 2&&isset($data[0])&&isset($data[1])) {
                 [$object, $method] = $data;
                 if (is_object($object) && is_string($method)) {
                     return new ObjectCall($object, $method);
                 }
             }
-            if (count($data) == 3) {
+            if (count($data) == 3&&isset($data[0])&&isset($data[1])&&isset($data[2])) {
                 [$object, $method, $args] = $data;
-                if (is_object($object) && is_string($method) && is_array($args)){
+                if (is_object($object) && is_string($method) && is_array($args)) {
                     if (empty($args)) {
-                        return new ObjectCall($object,$method);
+                        return new ObjectCall($object, $method);
                     }
-                return new ObjectCall($object, $method, $args);
+                    return new ObjectCall($object, $method, $args);
                 }
             }
             return new DataArray($data);
